@@ -6,11 +6,14 @@ from common_defs import *
 # a dict with x_train, y_train, x_test, y_test
 from load_data_for_regression import data
 
-from keras.models import Sequential
-from keras.layers.core import Dense, Dropout
+#from keras.layers.core import Dense, Dropout
 from keras.layers.normalization import BatchNormalization as BatchNorm
 from keras.callbacks import EarlyStopping
 from keras.layers.advanced_activations import *
+
+from keras.models import Sequential
+from keras.layers import  Dense, Conv1D, BatchNormalization, Activation, Dropout
+from keras.layers.pooling import GlobalAveragePooling1D
 
 from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler, MaxAbsScaler
 
@@ -19,13 +22,15 @@ from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler, Ma
 # TODO: advanced activations - 'leakyrelu', 'prelu', 'elu', 'thresholdedrelu', 'srelu' 
 
 
-max_layers = 3
+max_layers = 2
 max_layer_size = 100
+max_conv_layers = 10
 
 space = {
 	'scaler': hp.choice( 's', 
 		( None, 'StandardScaler', 'RobustScaler', 'MinMaxScaler', 'MaxAbsScaler' )),
 	'n_layers': hp.quniform( 'ls', 1, max_layers, 1 ),
+	'conv_layers': hp.quniform('cls', 1, max_conv_layers, 1),
 	#'layer_size': hp.quniform( 'ls', 5, 100, 1 ),
 	#'activation': hp.choice( 'a', ( 'relu', 'sigmoid', 'tanh' )),	
 	'init': hp.choice( 'i', ( 'uniform', 'normal', 'glorot_uniform', 
@@ -33,8 +38,18 @@ space = {
 	'batch_size': hp.choice( 'bs', ( 16, 32, 64, 128, 256 )),
 	'shuffle': hp.choice( 'sh', ( False, True )),
 	'loss': hp.choice( 'l', ( 'mean_absolute_error', 'mean_squared_error' )),
-	'optimizer': hp.choice( 'o', ( 'rmsprop', 'adagrad', 'adadelta', 'adam', 'adamax' ))		
+	'optimizer': hp.choice( 'o', ( 'rmsprop', 'adagrad', 'adadelta', 'adam', 'adamax' )),
+	'hidden_units': hp.quniform('hs', 2, max_layer_size, 1),
+	'activation': hp.choice('act', ['relu','sigmoid', 'tanh']),
+	'extra': hp.choice()
 }
+
+#for i in range(1, max_conv_layers+1):
+#	space['conv_layer_{}_channels'.format(i)] = hp.choice('channels{}'.format(i), [8,16,32, 64, 128, 256,512])
+#   space['conv_layer_{}_kernel_size'.format(i)] = hp.choice('kernel{}'.format(i), [1,3,5,7,9])
+#	space['conv_layer_{}_extras'.format(i)] = hp.choice('ce{}'.format(i), [{'name':'batchnorm'}, {'name':None}])
+#	space['conv_layer_{}_activation'.format(i)] = hp.choice('ca{}'.format(i), ['relu', 'sigmoid', 'tanh'])
+
 
 # for each hidden layer, we choose size, activation and extras individually
 for i in range( 1, max_layers + 1 ):
@@ -45,7 +60,8 @@ for i in range( 1, max_layers + 1 ):
 	space[ 'layer_{}_extras'.format( i )] = hp.choice( 'e{}'.format( i ), ( 
 		{ 'name': 'dropout', 'rate': hp.uniform( 'd{}'.format( i ), 0.1, 0.5 )}, 
 		{ 'name': 'batchnorm' },
-		{ 'name': None } ))	
+		{ 'name': None } ))
+
 	
 def get_params():
 
@@ -91,20 +107,26 @@ def try_params( n_iterations, params ):
 	input_dim = x_train_.shape[1]
 
 	model = Sequential()
-	model.add( Dense( params['layer_1_size'], init = params['init'], 
-		activation = params['layer_1_activation'], input_dim = input_dim ))
+#	for i in range(params['conv_layes']):
+#		model.add(Conv1D(params))
+
+#	model.add( Dense( params['layer_1_size'], init = params['init'],
+#		activation = params['layer_1_activation'], input_shape = x_train_.shape[1:] ))
 	
-	for i in range( int( params['n_layers'] ) - 1 ):
-		
+	for i in range( int( params['n_layers'] )  ):
+		if i == 0:
+			model.add(Dense(params['layer_{}_size'.format(i + 1)], init=params['init'],
+						activation=params['layer_{}_activation'.format(i + 1)], input_shape=x_train_.shape[1:]))
+		else:
+			model.add(Dense(params['layer_{}_size'.format(i + 1)], init=params['init'],
+							activation=params['layer_{}_activation'.format(i + 1)]))
 		extras = 'layer_{}_extras'.format( i + 1 )
-		
 		if params[extras]['name'] == 'dropout':
 			model.add( Dropout( params[extras]['rate'] ))
 		elif params[extras]['name'] == 'batchnorm':
 			model.add( BatchNorm())
 			
-		model.add( Dense( params['layer_{}_size'.format( i + 2 )], init = params['init'], 
-			activation = params['layer_{}_activation'.format( i + 2 )]))
+
 		   
 	model.add( Dense( 1, init = params['init'], activation = 'linear' ))
 

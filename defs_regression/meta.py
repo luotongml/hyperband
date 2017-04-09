@@ -1,7 +1,8 @@
 # meta regressor
 from common_defs import *
 
-regressors = ( 'gb', 'rf', 'xt', 'sgd', 'polylearn_fm', 'polylearn_pn', 'keras_mlp' )
+#regressors = ( 'gb', 'rf', 'xt', 'sgd', 'polylearn_fm', 'polylearn_pn', 'keras_mlp' )
+regressors = ['keras_ts']
 
 # import all the functions
 for r in regressors:
@@ -10,12 +11,14 @@ for r in regressors:
 
 space = { 'regressor': hp.choice( 'r', regressors ) }
 
+
 def get_params():
 	params = sample( space )
 	r = params['regressor']
 	r_params = eval( "get_params_{}()".format( r ))
 	params.update( r_params )
 	return params
+
 
 def try_params( n_iterations, params ):
 	
