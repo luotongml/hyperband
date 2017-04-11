@@ -19,7 +19,7 @@ from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler, Ma
 # TODO: advanced activations - 'leakyrelu', 'prelu', 'elu', 'thresholdedrelu', 'srelu' 
 
 
-max_layers = 3
+max_layers = 2
 max_layer_size = 100
 
 space = {
@@ -59,12 +59,12 @@ def get_params():
 # print hidden layers config in readable way
 def print_layers( params ):
 	for i in range( 1, params['n_layers'] + 1 ):
-		print "layer {} | size: {:>3} | activation: {:<7} | extras: {}".format( i,
+		print("layer {} | size: {:>3} | activation: {:<7} | extras: {}".format( i,
 			params['layer_{}_size'.format( i )], 
 			params['layer_{}_activation'.format( i )],
-			params['layer_{}_extras'.format( i )]['name'] ),
+			params['layer_{}_extras'.format( i )]['name'] )),
 		if params['layer_{}_extras'.format( i )]['name'] == 'dropout':
-			print "- rate: {:.1%}".format( params['layer_{}_extras'.format( i )]['rate'] ),
+			print("- rate: {:.1%}".format( params['layer_{}_extras'.format( i )]['rate'] )),
 		print
 
 def print_params( params ):
@@ -74,7 +74,7 @@ def print_params( params ):
 
 def try_params( n_iterations, params ):
 	
-	print "iterations:", n_iterations
+	print("iterations:", n_iterations)
 	print_params( params )
 	
 	y_train = data['y_train']
@@ -134,7 +134,7 @@ def try_params( n_iterations, params ):
 	mae = MAE( y_train, p )
 
 
-	print "\n# training | RMSE: {:.4f}, MAE: {:.4f}".format( rmse, mae )
+	print("\n# training | RMSE: {:.4f}, MAE: {:.4f}".format( rmse, mae ))
 
 	#
 
@@ -144,7 +144,7 @@ def try_params( n_iterations, params ):
 	rmse = sqrt( mse )
 	mae = MAE( y_test, p )
 
-	print "# testing  | RMSE: {:.4f}, MAE: {:.4f}".format( rmse, mae )	
+	print("# testing  | RMSE: {:.4f}, MAE: {:.4f}".format( rmse, mae ))
 	
 	return { 'loss': rmse, 'rmse': rmse, 'mae': mae, 'early_stop': model.stop_training }
 

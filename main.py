@@ -26,14 +26,14 @@ try:
 except IndexError:
 	output_file = 'results.pkl'
 	
-print "Will save results to", output_file
+print("Will save results to", output_file)
 
 #
 
 hb = Hyperband( get_params, try_params )
 results = hb.run( skip_last = 1 )
 
-print "{} total, best:\n".format( len( results ))
+print("{} total, best:\n".format( len( results ))）
 
 for r in sorted( results, key = lambda x: x['loss'] )[:5]:
 	print "loss: {:.2%} | {} seconds | {:.1f} iterations | run {} ".format( 

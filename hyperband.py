@@ -46,8 +46,8 @@ class Hyperband:
 				n_configs = n * self.eta ** ( -i )
 				n_iterations = r * self.eta ** ( i )
 				
-				print "\n*** {} configurations x {:.1f} iterations each".format( 
-					n_configs, n_iterations )
+				print("\n*** {} configurations x {:.1f} iterations each".format(
+					n_configs, n_iterations ))
 				
 				val_losses = []
 				early_stops = []
@@ -55,8 +55,8 @@ class Hyperband:
 				for t in T:
 					
 					self.counter += 1
-					print "\n{} | {} | best so far: {:.4f} (run {})\n".format( 
-						self.counter, ctime(), self.best_loss, self.best_counter )
+					print("\n{} | {} | best so far: {:.4f} (run {})\n".format(
+						self.counter, ctime(), self.best_loss, self.best_counter ))
 					
 					start_time = time()
 					
@@ -69,7 +69,7 @@ class Hyperband:
 					assert( 'loss' in result )
 					
 					seconds = int( round( time() - start_time ))
-					print "\n{} seconds.".format( seconds )
+					print("\n{} seconds.".format( seconds ))
 					
 					loss = result['loss']	
 					val_losses.append( loss )

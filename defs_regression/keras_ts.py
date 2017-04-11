@@ -7,7 +7,7 @@ from common_defs import *
 from load_data_for_regression import data
 
 #from keras.layers.core import Dense, Dropout
-from keras.layers.normalization import BatchNormalization as BatchNorm
+from keras.layers.normalization import BatchNormalization
 from keras.callbacks import EarlyStopping
 from keras.layers.advanced_activations import *
 
@@ -38,10 +38,7 @@ space = {
 	'batch_size': hp.choice( 'bs', ( 16, 32, 64, 128, 256 )),
 	'shuffle': hp.choice( 'sh', ( False, True )),
 	'loss': hp.choice( 'l', ( 'mean_absolute_error', 'mean_squared_error' )),
-	'optimizer': hp.choice( 'o', ( 'rmsprop', 'adagrad', 'adadelta', 'adam', 'adamax' )),
-	'hidden_units': hp.quniform('hs', 2, max_layer_size, 1),
-	'activation': hp.choice('act', ['relu','sigmoid', 'tanh']),
-	'extra': hp.choice()
+	'optimizer': hp.choice( 'o', ( 'rmsprop', 'adagrad', 'adadelta', 'adam', 'adamax' ))
 }
 
 #for i in range(1, max_conv_layers+1):
@@ -55,11 +52,11 @@ space = {
 for i in range( 1, max_layers + 1 ):
 	space[ 'layer_{}_size'.format( i )] = hp.quniform( 'ls{}'.format( i ), 
 		2, max_layer_size, 1 )
+	space['layer_{}_bn'.format(i)] = hp.choice('bn{}'.format(i),[True, False])
 	space[ 'layer_{}_activation'.format( i )] = hp.choice( 'a{}'.format( i ), 
 		( 'relu', 'sigmoid', 'tanh' ))
 	space[ 'layer_{}_extras'.format( i )] = hp.choice( 'e{}'.format( i ), ( 
-		{ 'name': 'dropout', 'rate': hp.uniform( 'd{}'.format( i ), 0.1, 0.5 )}, 
-		{ 'name': 'batchnorm' },
+		{ 'name': 'dropout', 'rate': hp.uniform( 'd{}'.format( i ), 0.1, 0.5 )},
 		{ 'name': None } ))
 
 	
@@ -75,12 +72,13 @@ def get_params():
 # print hidden layers config in readable way
 def print_layers( params ):
 	for i in range( 1, params['n_layers'] + 1 ):
-		print "layer {} | size: {:>3} | activation: {:<7} | extras: {}".format( i,
-			params['layer_{}_size'.format( i )], 
+		print("layer {} | size: {:>3} | batchnorm:{} |activation: {:<7} | extras: {}".format( i,
+			params['layer_{}_size'.format( i )],
+			params['layer_{}_bn'.format(i)],
 			params['layer_{}_activation'.format( i )],
-			params['layer_{}_extras'.format( i )]['name'] ),
+			params['layer_{}_extras'.format( i )]['name'] ))
 		if params['layer_{}_extras'.format( i )]['name'] == 'dropout':
-			print "- rate: {:.1%}".format( params['layer_{}_extras'.format( i )]['rate'] ),
+			print("- rate: {:.1%}".format( params['layer_{}_extras'.format( i )]['rate'] ))
 		print
 
 def print_params( params ):
@@ -90,7 +88,7 @@ def print_params( params ):
 
 def try_params( n_iterations, params ):
 	
-	print "iterations:", n_iterations
+	print("iterations:", n_iterations)
 	print_params( params )
 	
 	y_train = data['y_train']
@@ -113,18 +111,21 @@ def try_params( n_iterations, params ):
 #	model.add( Dense( params['layer_1_size'], init = params['init'],
 #		activation = params['layer_1_activation'], input_shape = x_train_.shape[1:] ))
 	
-	for i in range( int( params['n_layers'] )  ):
-		if i == 0:
-			model.add(Dense(params['layer_{}_size'.format(i + 1)], init=params['init'],
-						activation=params['layer_{}_activation'.format(i + 1)], input_shape=x_train_.shape[1:]))
+	for i in range( 1, int( params['n_layers'] )+1  ):
+		if i == 1:
+			model.add(Dense(params['layer_{}_size'.format(i)], kernel_initializer=params['init'],
+						input_shape=x_train_.shape[1:]))
 		else:
-			model.add(Dense(params['layer_{}_size'.format(i + 1)], init=params['init'],
-							activation=params['layer_{}_activation'.format(i + 1)]))
-		extras = 'layer_{}_extras'.format( i + 1 )
+			model.add(Dense(params['layer_{}_size'.format(i)], kernel_initializer=params['init']))
+
+		if params['layer_{}_bn'.format(i)]:
+			model.add(BatchNormalization())
+		model.add(Activation(params['layer_{}_activation'.format(i)]))
+
+		extras = 'layer_{}_extras'.format( i )
 		if params[extras]['name'] == 'dropout':
 			model.add( Dropout( params[extras]['rate'] ))
-		elif params[extras]['name'] == 'batchnorm':
-			model.add( BatchNorm())
+
 			
 
 		   
@@ -156,7 +157,7 @@ def try_params( n_iterations, params ):
 	mae = MAE( y_train, p )
 
 
-	print "\n# training | RMSE: {:.4f}, MAE: {:.4f}".format( rmse, mae )
+	print("\n# training | RMSE: {:.4f}, MAE: {:.4f}".format( rmse, mae ))
 
 	#
 
@@ -166,7 +167,7 @@ def try_params( n_iterations, params ):
 	rmse = sqrt( mse )
 	mae = MAE( y_test, p )
 
-	print "# testing  | RMSE: {:.4f}, MAE: {:.4f}".format( rmse, mae )	
+	print("# testing  | RMSE: {:.4f}, MAE: {:.4f}".format( rmse, mae ))
 	
 	return { 'loss': rmse, 'rmse': rmse, 'mae': mae, 'early_stop': model.stop_training }
 

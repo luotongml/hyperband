@@ -4,7 +4,7 @@ train_file = 'data/kin8nm/train.csv'
 valid_file = 'data/kin8nm/validation.csv'
 test_file = 'data/kin8nm/test.csv'
 
-print "loading data..."
+print("loading data...")
 
 train = np.loadtxt( open( train_file ), delimiter = "," )
 valid = np.loadtxt( open( valid_file ), delimiter = "," )
