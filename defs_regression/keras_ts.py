@@ -129,7 +129,7 @@ def try_params( n_iterations, params ):
 			
 
 		   
-	model.add( Dense( 1, init = params['init'], activation = 'linear' ))
+	model.add( Dense( 1, kernel_initializer = params['init'], activation = 'linear' ))
 
 	model.compile( optimizer = params['optimizer'], loss = params['loss'] )
 	
@@ -142,7 +142,7 @@ def try_params( n_iterations, params ):
 	early_stopping = EarlyStopping( monitor = 'val_loss', patience = 5, verbose = 0 )
 	
 	history = model.fit( x_train_, y_train,
-		nb_epoch = int( round( n_iterations )),
+		epochs = int( round( n_iterations )),
 		batch_size = params['batch_size'], 
 		shuffle = params['shuffle'], 
 		validation_data = validation_data, 
