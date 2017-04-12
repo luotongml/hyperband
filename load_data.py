@@ -6,10 +6,8 @@ import cPickle as pickle
 
 data_file = 'data/classification.pkl'
 
-print "loading..."
+print
+"loading..."
 
-with open( data_file, 'rb' ) as f:
-	data = pickle.load( f )
-
-
-
+with open(data_file, 'rb') as f:
+    data = pickle.load(f)
