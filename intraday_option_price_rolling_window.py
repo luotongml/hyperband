@@ -23,7 +23,6 @@ from xgboost import XGBRegressor
 
 import scipy.stats as stats
 
-get_ipython().magic('matplotlib notebook')
 
 
 # In[2]:

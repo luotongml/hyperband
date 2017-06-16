@@ -14,14 +14,9 @@ import pandas as pd
 #from sklearn.ensemble import GradientBoostingRegressor
 
 
-
-
-# In[3]:
-
-def load_option(path="data/"):
-    file = path + "bigdf.pkl"
-    print("loading data {} ....".format(file))
-    big_df = pd.read_pickle(file)
+def load_option(path="data/bigdf.pkl"):
+    print("loading data {} ....".format(path))
+    big_df = pd.read_pickle(path)
     train_dates = ['20160112', '20160113']
     test_dates = ['20160114']
 
