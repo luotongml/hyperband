@@ -2,7 +2,7 @@
 from common_defs import *
 
 # regressors = ( 'gb', 'rf', 'xt', 'sgd', 'polylearn_fm', 'polylearn_pn', 'keras_mlp' )
-regressors = ['keras_ts']
+regressors = ['keras_mlp', 'keras_ts']
 
 # import all the functions
 for r in regressors:
