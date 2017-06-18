@@ -42,10 +42,11 @@ space = {
 }
 
 # for i in range(1, max_conv_layers+1):
-#	space['conv_layer_{}_channels'.format(i)] = hp.choice('channels{}'.format(i), [8,16,32, 64, 128, 256,512])
-#   space['conv_layer_{}_kernel_size'.format(i)] = hp.choice('kernel{}'.format(i), [1,3,5,7,9])
-#	space['conv_layer_{}_extras'.format(i)] = hp.choice('ce{}'.format(i), [{'name':'batchnorm'}, {'name':None}])
-#	space['conv_layer_{}_activation'.format(i)] = hp.choice('ca{}'.format(i), ['relu', 'sigmoid', 'tanh'])
+#     space['conv_layer_{}_channels'.format(i)] = hp.choice('channels{}'.format(i), [8,16,32, 64, 128, 256,512])
+#     space['conv_layer_{}_kernel_size'.format(i)] = hp.choice('kernel{}'.format(i), [1,3,5,7,9])
+#     space['layer_{}_bn'.format(i)] = hp.choice('cnn_{}_bn'.format(i), [True, False])
+#     space['conv_layer_{}_extras'.format(i)] = hp.choice('ce{}'.format(i), [{'name':'batchnorm'}, {'name':None}])
+#     space['conv_layer_{}_activation'.format(i)] = hp.choice('ca{}'.format(i), ['relu', 'sigmoid', 'tanh'])
 
 
 # for each hidden layer, we choose size, activation and extras individually
@@ -71,9 +72,7 @@ def get_params():
 def print_layers(params):
     for i in range(1, params['n_layers'] + 1):
         print("layer {} | size: {:>3} | batchnorm:{} |activation: {:<7} | extras: {}".format(i,
-                                                                                             params[
-                                                                                                 'layer_{}_size'.format(
-                                                                                                     i)],
+                                                                                             params['layer_{}_size'.format(i)],
                                                                                              params[
                                                                                                  'layer_{}_bn'.format(
                                                                                                      i)],
@@ -125,11 +124,12 @@ def try_params(n_iterations, params):
         else:
             model.add(Dense(params['layer_{}_size'.format(i)], kernel_initializer=params['init']))
 
-
-        model.add(Activation(params['layer_{}_activation'.format(i)]))
         if params['layer_{}_bn'.format(i)]:
             model.add(BatchNormalization())
+        model.add(Activation(params['layer_{}_activation'.format(i)]))
         extras = 'layer_{}_extras'.format(i)
+        if not params['layer_{}_bn'.format(i)]:
+            model.add(BatchNormalization())
         if params[extras]['name'] == 'dropout':
             model.add(Dropout(params[extras]['rate']))
 

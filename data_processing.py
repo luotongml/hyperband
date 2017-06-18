@@ -14,11 +14,29 @@ import pandas as pd
 #from sklearn.ensemble import GradientBoostingRegressor
 
 
-def load_option(path="data/bigdf.pkl"):
+#steps
+# load all data and merge as necessary
+# extract features x and y variables
+# normal train/test split, [train_x, train_y], [test_x, test_y]
+# rolling window train/test split generator of [train_x, train_y] [ test_x, test_y]
+
+
+
+def load_options(path="data/bigdf.pkl"):
     print("loading data {} ....".format(path))
-    big_df = pd.read_pickle(path)
+    df = pd.read_pickle(path)
+    return df
+
+
+def extract_option_features(df):
+    df_y = df['mid']
+    df_x = df[['years_to_exe', 'etf_mid', 'exeprice']]
+    return (df_x, df_y)
+
+def tran_test_split((df_x, df_y), rolling=False):
     train_dates = ['20160112', '20160113']
     test_dates = ['20160114']
+    big_df = []
 
     all_dates = train_dates + test_dates
     train = []
@@ -37,8 +55,7 @@ def load_option(path="data/bigdf.pkl"):
     train = train.dropna()
     test = test.dropna()
 
-    train_y = train['mid']
-    train_x = train[['years_to_exe', 'etf_mid', 'exeprice']]
+
 
     test_y = test['mid']
     test_x = test[['years_to_exe', 'etf_mid', 'exeprice']]
