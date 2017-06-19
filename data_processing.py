@@ -39,27 +39,17 @@ def extract_option_features(df):
 
 
 def train_test_split(big_df, window = 2):
-    #TODO: trade_date is missing
-    big_df['trade_date'] = big_df['exedate'].dt.strftime('%Y-%m-%d')
-    date = big_df['trade_date'].unique()
+    date = np.unique(big_df.index.date)
 
     for i in range(len(date)-window):
         train_dates = date[slice(i, i + window)]
         test_dates = date[i+window]
 
-        train = []
-        for d in train_dates:
-            #TODO: d is not in the index
-            t = big_df.loc[d]
-            train.append(t)
 
-        test = []
-        for d in test_dates:
-            t = big_df.loc[d]
-            test.append(t)
+        #TODO:loc doesnt seem to work with date selection
+        train = big_df.loc[date[i]:date[i+window]]
+        test = big_df.loc[date[i + window]]
 
-        train = pd.concat(train)
-        test = pd.concat(test)
 
         (x_train,y_train) = extract_option_features(train)
         (x_test, y_test) = extract_option_features(test)
