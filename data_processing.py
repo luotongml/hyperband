@@ -29,36 +29,38 @@ def load_options(path="data/bigdf.pkl"):
 
 
 def extract_option_features(df):
+    df = df['mid','years_to_exe', 'etf_mid', 'exeprice'].dropna()
     df_y = df['mid']
     df_x = df[['years_to_exe', 'etf_mid', 'exeprice']]
     return (df_x, df_y)
 
-def tran_test_split((df_x, df_y), rolling=False):
+
+def train_test_split(big_df, window = 2):
     train_dates = ['20160112', '20160113']
     test_dates = ['20160114']
-    big_df = []
 
-    all_dates = train_dates + test_dates
-    train = []
-    for d in train_dates:
-        t = big_df.loc[d]
-        train.append(t)
+    date = big_df['tradedate'].dt.strftime('%Y-%m-%d').unique()
 
-    test = []
-    for d in test_dates:
-        t = big_df.loc[d]
-        test.append(t)
+    for i in range(len(date)-window):
+        train_dates = date[slice(i, i + window)]
+        test_dates = date[i+window]
 
-    train = pd.concat(train)
-    test = pd.concat(test)
+        train = []
+        for d in train_dates:
+            t = big_df.loc[d]
+            train.append(t)
 
-    train = train.dropna()
-    test = test.dropna()
+        test = []
+        for d in test_dates:
+            t = big_df.loc[d]
+            test.append(t)
 
+        train = pd.concat(train)
+        test = pd.concat(test)
 
+        (x_train,y_train) = extract_option_features(train)
+        (x_test, y_test) = extract_option_features(test)
 
-    test_y = test['mid']
-    test_x = test[['years_to_exe', 'etf_mid', 'exeprice']]
+        data = {'x_train': x_train, 'y_train': y_train, 'x_test': x_test, 'y_test': y_test}
 
-    data = {'x_train': train_x, 'y_train': train_y, 'x_test': test_x, 'y_test': test_y}
-    return data
+        return data
