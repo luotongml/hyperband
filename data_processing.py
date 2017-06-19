@@ -27,19 +27,20 @@ def load_options(path="data/bigdf.pkl"):
     df = pd.read_pickle(path)
     return df
 
+def to_sample_options(path="data/sample_option.pkl"):
+    df = load_options()
+    pd.to_pickle(df[:10],path)
 
 def extract_option_features(df):
-    df = df['mid','years_to_exe', 'etf_mid', 'exeprice'].dropna()
+    df = df['mid','years_to_exe', 'exedate', 'etf_mid', 'exeprice'].dropna()
     df_y = df['mid']
     df_x = df[['years_to_exe', 'etf_mid', 'exeprice']]
     return (df_x, df_y)
 
 
 def train_test_split(big_df, window = 2):
-    train_dates = ['20160112', '20160113']
-    test_dates = ['20160114']
-
-    date = big_df['tradedate'].dt.strftime('%Y-%m-%d').unique()
+    big_df['trade_date'] = big_df['exedate'].dt.strftime('%Y-%m-%d')
+    date = big_df['trade_date'].unique()
 
     for i in range(len(date)-window):
         train_dates = date[slice(i, i + window)]
@@ -63,4 +64,4 @@ def train_test_split(big_df, window = 2):
 
         data = {'x_train': x_train, 'y_train': y_train, 'x_test': x_test, 'y_test': y_test}
 
-        return data
+        yield data
