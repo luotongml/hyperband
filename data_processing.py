@@ -6,6 +6,7 @@ from __future__ import division
 import os
 import numpy as np
 import pandas as pd
+import datetime
 #import matplotlib.pyplot as plt
 #from vollib.black_scholes.implied_volatility import implied_volatility
 #from vollib.black_scholes.greeks.numerical import delta, theta, vega, gamma
@@ -40,16 +41,12 @@ def extract_option_features(df):
 
 def train_test_split(big_df, window = 2):
     date = np.unique(big_df.index.date)
+    day1 = datetime.timedelta(days=1)
 
     for i in range(len(date)-window):
-        train_dates = date[slice(i, i + window)]
-        test_dates = date[i+window]
-
-
         #TODO:loc doesnt seem to work with date selection
-        train = big_df.loc[date[i]:date[i+window]]
-        test = big_df.loc[date[i + window]]
-
+        train = big_df.loc[date[i].strftime('%Y-%m-%d'):date[i+window].strftime('%Y-%m-%d')]
+        test = big_df.loc[date[i + window].strftime('%Y-%m-%d'):(date[i + window]+day1).strftime('%Y-%m-%d')]
 
         (x_train,y_train) = extract_option_features(train)
         (x_test, y_test) = extract_option_features(test)
