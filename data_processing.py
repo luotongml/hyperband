@@ -44,9 +44,8 @@ def train_test_split(big_df, window = 2):
     day1 = datetime.timedelta(days=1)
 
     for i in range(len(date)-window):
-        #TODO:loc doesnt seem to work with date selection
-        train = big_df.loc[date[i].strftime('%Y-%m-%d'):date[i+window].strftime('%Y-%m-%d')]
-        test = big_df.loc[date[i + window].strftime('%Y-%m-%d'):(date[i + window]+day1).strftime('%Y-%m-%d')]
+        train = big_df.loc[big_df.loc[(big_df.index > datetime.datetime.combine(date[i],datetime.time.min)) & (big_df.index < datetime.datetime.combine(date[i+window],datetime.time.min))]]
+        test = big_df.loc[big_df.loc[(big_df.index >= datetime.datetime.combine(date[i+window],datetime.time.min)) & (big_df.index <= datetime.datetime.combine(date[i+window],datetime.time.max))]]
 
         (x_train,y_train) = extract_option_features(train)
         (x_test, y_test) = extract_option_features(test)
