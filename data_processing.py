@@ -28,28 +28,28 @@ def load_options(path="data/bigdf.pkl"):
     df = pd.read_pickle(path)
     return df
 
+def save_options(df, path):
+    print("saving data to {}".format(path))
+    pd.to_pickle(df, path)
+
 def to_sample_options(path="data/sample_option.pkl"):
     df = load_options()
     pd.to_pickle(df[:10],path)
 
 def extract_option_features(df):
-    df = df['mid','years_to_exe', 'exedate', 'etf_mid', 'exeprice'].dropna()
+    df = df[['mid','years_to_exe', 'exedate', 'etf_mid', 'exeprice']].dropna()
     df_y = df['mid']
     df_x = df[['years_to_exe', 'etf_mid', 'exeprice']]
     return (df_x, df_y)
 
 
-def train_test_split(big_df, window = 2):
-    date = np.unique(big_df.index.date)
-    day1 = datetime.timedelta(days=1)
+def train_test_split(df, window = 2):
+    date = np.unique(df.index.date)
 
     for i in range(len(date)-window):
-        train = big_df.loc[big_df.loc[(big_df.index > datetime.datetime.combine(date[i],datetime.time.min)) & (big_df.index < datetime.datetime.combine(date[i+window],datetime.time.min))]]
-        test = big_df.loc[big_df.loc[(big_df.index >= datetime.datetime.combine(date[i+window],datetime.time.min)) & (big_df.index <= datetime.datetime.combine(date[i+window],datetime.time.max))]]
-
+        train = df.loc[(df.index > datetime.datetime.combine(date[i],datetime.time.min)) & (df.index < datetime.datetime.combine(date[i+window],datetime.time.min))]
+        test = df.loc[(df.index >= datetime.datetime.combine(date[i+window],datetime.time.min)) & (df.index <= datetime.datetime.combine(date[i+window],datetime.time.max))]
         (x_train,y_train) = extract_option_features(train)
         (x_test, y_test) = extract_option_features(test)
-
         data = {'x_train': x_train, 'y_train': y_train, 'x_test': x_test, 'y_test': y_test}
-
         yield data
