@@ -21,8 +21,6 @@ import datetime
 # normal train/test split, [train_x, train_y], [test_x, test_y]
 # rolling window train/test split generator of [train_x, train_y] [ test_x, test_y]
 
-
-
 def load_options(path="data/bigdf.pkl"):
     print("loading data {} ....".format(path))
     df = pd.read_pickle(path)
@@ -37,9 +35,11 @@ def to_sample_options(path="data/sample_option.pkl"):
     pd.to_pickle(df[:10],path)
 
 def extract_option_features(df):
-    df = df[['mid','years_to_exe', 'exedate', 'etf_mid', 'exeprice']].dropna()
+    df['moneyness'] = df['mid']/df['exeprice']
+    #df = df[['mid','years_to_exe', 'exedate', 'etf_mid', 'exeprice']].dropna()
+    df = df[['mid', 'years_to_exe', 'moneyness','etf_mid']].dropna()
     df_y = df['mid']
-    df_x = df[['years_to_exe', 'etf_mid', 'exeprice']]
+    df_x = df[['years_to_exe', 'moneyness','etf_mid']]
     return (df_x, df_y)
 
 
